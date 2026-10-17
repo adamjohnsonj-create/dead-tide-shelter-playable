@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#071524" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>DEAD TIDE · Shelter 01</title>
+<style>
+:root{color-scheme:dark;--ink:#ecf7ff;--muted:#96adc0;--panel:#0b2135;--edge:#2a526b;--cyan:#54e4e2;--gold:#ffce62;--red:#fa6c76}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overscroll-behavior:none;background:#061522;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 60% 15%,#183349 0%,#081724 46%,#030b15 100%)}
+#app{position:relative;display:flex;flex-direction:column;height:100%;height:100dvh;width:100%;max-width:510px;overflow:hidden;background:#0b1b2d;box-shadow:0 0 80px #0008;isolation:isolate}
+@media(min-width:560px){#app{height:min(100dvh,940px);border:1px solid #2e566a;border-radius:16px}}
+header{position:relative;z-index:3;display:flex;flex-direction:column;gap:8px;padding:calc(9px + env(safe-area-inset-top,0px)) 13px 10px;background:linear-gradient(180deg,#102e41,#0b2032);border-bottom:1px solid #346176;min-height:99px;box-shadow:0 4px 18px #001b28aa}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.brand{font-size:18px;font-weight:1000;letter-spacing:2px;white-space:nowrap;line-height:1}
+.brand b{color:var(--gold)}.brand small{font-size:9px;color:#a5c9d6;display:block;letter-spacing:3.1px;margin-top:5px;font-weight:700}
+.right{display:flex;align-items:center;gap:7px}
+.chip{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:900;line-height:1.15;padding:6px 9px;background:#193e50;border:1px solid #345f73;border-radius:9px;min-height:29px;white-space:nowrap}
+.chip.money{color:#b7ffc9}.chip.wave{color:#ffdf98}
+.sound{width:29px;height:29px;border:1px solid #355d70;background:#1b3e50;border-radius:9px;color:#b8d3df;font-size:15px;cursor:pointer}
+.healthrow{display:flex;align-items:center;gap:7px;height:15px;min-width:0}
+.healthrow label{font-weight:900;color:#b9d5e3;font-size:9px;letter-spacing:1.2px;white-space:nowrap}
+.healthtrack{flex:1;background:#1a3442;height:10px;border:1px solid #3f5764;border-radius:50px;overflow:hidden}
+#healthFill{height:100%;width:100%;background:linear-gradient(90deg,#fa7178,#ffb46b,#73e7b0);transition:width .24s}
+#healthText{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;color:#e7f4fa;min-width:44px;text-align:right}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden;background:linear-gradient(#345b78,#092b42);touch-action:none;cursor:crosshair}
+#game{display:block;width:100%;height:100%;touch-action:none;object-fit:contain}
+#toast{position:absolute;z-index:4;top:11px;left:50%;transform:translate(-50%,-12px);max-width:90%;width:max-content;pointer-events:none;padding:9px 14px;border:1px solid #81f1ddb5;border-radius:14px;background:#063340eb;box-shadow:0 8px 30px #0007;font-size:12px;font-weight:850;text-align:center;opacity:0;transition:.23s}
+#toast.visible{opacity:1;transform:translate(-50%,0)}
+#objective{position:absolute;bottom:10px;left:10px;right:10px;display:flex;align-items:center;gap:7px;justify-content:center;pointer-events:none;font-size:10px;letter-spacing:.8px;font-weight:800;text-align:center;color:#d7f5fc;text-shadow:0 2px 5px #0015}
+#objective .goal{background:#051725d6;border:1px solid #4e7385b8;border-radius:30px;padding:5px 9px}
+footer{position:relative;z-index:3;background:linear-gradient(#102c3e,#071826);border-top:1px solid #386375;padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px));min-height:107px}
+.controls{display:grid;grid-template-columns:1.18fr 1fr 1.13fr 49px;gap:8px}
+.control{appearance:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;min-height:63px;position:relative;border:1px solid #3d6978;border-radius:13px;background:linear-gradient(#254d61,#18374c);color:#e9f8ff;box-shadow:inset 0 1px #86b9cd33,0 4px 0 #04101b;cursor:pointer;touch-action:manipulation;user-select:none}
+.control strong{font-size:12px;letter-spacing:.45px;white-space:nowrap}.control small{font-weight:700;font-size:9px;color:#c5dce6}
+.control .emoji{font-size:19px;line-height:1.15}.control.primary{border-color:#d6ad59;background:linear-gradient(#a97c34,#735522);color:#fff8db}
+.control.primary small{color:#ffdeb2}.control:active{transform:translateY(3px);box-shadow:inset 0 1px #86b9cd33,0 1px 0 #04101b}
+.control:disabled{opacity:.45;filter:saturate(.5);cursor:not-allowed}
+.control.airready{background:linear-gradient(180deg,#3f7881,#1d505d);border-color:#5be5e6;animation:pulseButton 1.1s infinite alternate}
+@keyframes pulseButton{to{box-shadow:0 0 13px #65ffff66,0 4px 0 #04101b}}
+.hint{display:block;margin:8px 0 0;text-align:center;color:#84acbf;font-size:10px;letter-spacing:.2px}
+.overlay{position:absolute;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:18px;background:#04131be8;backdrop-filter:blur(5px);overflow-y:auto}
+.overlay.open{display:flex}
+.dialog{position:relative;max-width:435px;width:100%;border:1px solid #578397;border-radius:20px;background:linear-gradient(160deg,#193e50,#092234 65%);box-shadow:0 18px 80px #000c;overflow:hidden;padding:20px}
+.dialog::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#39baba,#ffdc76,#f7736b)}
+.kicker{font-size:10px;letter-spacing:2.3px;color:#66d6d5;font-weight:900}
+h1{font-size:35px;line-height:1.03;letter-spacing:1px;margin:12px 0 10px;font-weight:1000}h1 em{font-style:normal;color:#ffce69}
+h2{margin:6px 0 9px;font-size:24px}p{font-size:13px;line-height:1.52;color:#bcd4e0}
+.hero-art{position:relative;height:151px;margin:14px -1px;border-radius:12px;overflow:hidden;border:1px solid #52889b;background:linear-gradient(175deg,#4f94b6,#7dc9d0 47%,#32aec5 48%,#05566f)}
+.hero-art:before{content:"";position:absolute;left:27%;top:26%;width:100%;height:100%;background:linear-gradient(153deg,#5c4939,#241a1a);clip-path:polygon(28% 0,100% 0,100% 100%,0 100%,22% 35%);box-shadow:-2px -2px 7px #fff4}
+.hero-art .bunker{position:absolute;right:7%;bottom:19%;height:62px;width:40%;border:7px solid #34404b;background:linear-gradient(135deg,#d9b175,#684838);border-radius:2px;box-shadow:inset 0 0 0 2px #eab76e}
+.hero-art .bunker:before{content:"";position:absolute;left:38%;top:11px;width:17px;height:33px;border-radius:13px 13px 0 0;background:#8af4d0;box-shadow:0 0 18px #85ffe1}
+.hero-art .z{position:absolute;top:28px;color:#ff9c94;font-size:28px;right:13%;text-shadow:0 3px 4px #321}
+.hero-art .h{position:absolute;left:13%;top:42px;font-size:48px;transform:rotate(-16deg);filter:drop-shadow(0 8px 4px #055a75)}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+.rule{padding:10px;background:#0a2b3a;border:1px solid #375f70;border-radius:12px;font-size:11px;color:#b9d6df;line-height:1.3}.rule b{display:block;color:#fff;font-size:12px;margin-bottom:4px}
+.action{display:block;width:100%;padding:15px;border:0;border-radius:12px;background:linear-gradient(110deg,#fed275,#f8a94d);color:#17212c;font-weight:1000;font-size:16px;letter-spacing:1px;cursor:pointer;box-shadow:0 5px 0 #9e612a}
+.action:active{transform:translateY(4px);box-shadow:0 1px 0 #9e612a}
+.action.secondary{background:linear-gradient(#2d5768,#1a3c50);border:1px solid #4c8294;color:#ddf5fa;box-shadow:0 4px 0 #051b29}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.xbtn{font-size:23px;color:#d9f5fa;background:#183c4d;border:1px solid #47697a;border-radius:10px;width:37px;height:37px;cursor:pointer}
+#buildCards{display:grid;gap:8px;margin-top:13px;max-height:min(58dvh,480px);overflow-y:auto;padding-right:2px}
+.buildcard{border:1px solid #426e7d;background:#0b2b3b;border-radius:12px;padding:11px 11px 10px;display:grid;grid-template-columns:33px 1fr auto;gap:10px;align-items:center}
+.buildicon{font-size:27px}.buildtitle{font-size:12px;font-weight:900}.builddesc{font-size:10px;line-height:1.35;color:#a9c5d0;margin-top:3px}
+.bar{height:4px;width:100%;background:#203e49;border-radius:5px;margin-top:8px;overflow:hidden}.bar i{display:block;background:#66d9a3;height:100%;border-radius:5px}
+.buy{min-width:82px;min-height:43px;border:1px solid #c5a75b;border-radius:10px;background:linear-gradient(#ffce6e,#e8a843);color:#24313c;font-size:11px;font-weight:1000;cursor:pointer}.buy:disabled{opacity:.45;filter:grayscale(.55);cursor:default}
+.buy.built{background:#244c54;color:#87f9bb;border-color:#4f9b8c;opacity:1}
+#resultStats{margin:16px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.resultstat{background:#102f40;border:1px solid #3d6878;padding:11px 6px;text-align:center;border-radius:12px;font-size:9px;color:#a8cbd3;letter-spacing:.5px}
+.resultstat b{font-size:21px;display:block;color:#ffe097;margin-bottom:3px}
+@media(max-height:725px){header{padding-top:7px;gap:6px;min-height:88px}footer{min-height:96px;padding-top:7px}.control{min-height:57px}.hint{margin-top:6px}h1{font-size:29px}.dialog{padding:14px}.rules{margin:10px 0}.hero-art{height:105px;margin:9px 0}}
+</style>
+</head>
+<body>
+<div id="app">
+ <header>
+  <div class="header-top"><div class="brand">DEAD <b>TIDE</b><small>SHELTER 01</small></div><div class="right"><div class="chip money">💵 <span id="money">$160</span></div><div class="chip wave">⚠️ <span id="wave">1 / 6</span></div><button class="sound" id="sound" aria-label="Toggle sound">🔊</button></div></div>
+  <div class="healthrow"><label>SHELTER</label><div class="healthtrack"><div id="healthFill"></div></div><span id="healthText">100 / 100</span></div>
+ </header>
+ <div id="stage"><canvas id="game" aria-label="Interactive cliffside digging and zombie defense game"></canvas><div id="toast" role="status" aria-live="polite"></div><div id="objective"><div class="goal" id="goal">RESCUE 3 SURVIVORS · SURVIVE 6 WAVES</div></div></div>
+ <footer>
+  <div class="controls"><button class="control primary" id="mineBtn"><span class="emoji">⛏️</span><strong>DIG / AIM</strong><small>Touch terrain or zombies</small></button><button class="control" id="buildBtn"><span class="emoji">🏗️</span><strong>BUILD</strong><small id="buildHint">Upgrade shelter</small></button><button class="control" id="airBtn"><span class="emoji">🚁</span><strong>AIRSTRIKE</strong><small id="airHint">Wave 3 unlock</small></button><button class="control" id="pauseBtn" aria-label="Pause"><span class="emoji">⏸</span><strong>PAUSE</strong></button></div>
+  <span class="hint">Drag to dig tunnels. Tap or hold on zombies to shoot.</span>
+ </footer>
+ <div class="overlay open" id="intro">
+  <div class="dialog"><div class="kicker">THE AD — NOW ACTUALLY PLAYABLE</div><h1>DIG DEEP.<br><em>DON'T GET BIT.</em></h1>
+   <p>A storm drove the dead to your coastal shelter. Carve tunnels, find trapped people, expand your bunker, and survive six waves.</p>
+   <div class="hero-art"><div class="bunker"></div><span class="z">🧟 🧟</span><span class="h">🚁</span></div>
+   <div class="rules"><div class="rule"><b>⛏️ DRAG THE ROCK</b>Excavate connected dirt. Find money and survivors.</div><div class="rule"><b>🎯 TAP THE DEAD</b>Shoot zombies before they break down your gate.</div><div class="rule"><b>🏗️ BUILD ROOMS</b>Clear marked zones, then build for more firepower.</div><div class="rule"><b>🚁 CALL SUPPORT</b>Survive to wave 3, then earn airstrikes.</div></div>
+   <button class="action" id="startBtn">START SURVIVING →</button></div>
+ </div>
+ <div class="overlay" id="buildOverlay"><div class="dialog"><div class="modal-head"><div><div class="kicker">UNDERGROUND OPERATIONS</div><h2>Build & Upgrade</h2></div><button class="xbtn" id="closeBuild" aria-label="Close">×</button></div><p>Dig out the outlined sites first. Upgrade your defenses before the next wave.</p><div id="buildCards"></div></div></div>
+ <div class="overlay" id="pauseOverlay"><div class="dialog"><div class="kicker">PAUSED</div><h2>Hold the line.</h2><p>Tap resume to get back to digging. Your progress stays here until you close the page.</p><button class="action" id="resumeBtn">RESUME</button><button class="action secondary" id="restartPause" style="margin-top:11px">RESTART RUN</button></div></div>
+ <div class="overlay" id="endOverlay"><div class="dialog"><div class="kicker" id="endKicker">MISSION COMPLETE</div><h1 id="endTitle">SHELTER<br><em>SECURED.</em></h1><p id="endDesc"></p><div id="resultStats"></div><button class="action" id="restartBtn">PLAY AGAIN →</button></div></div>
+</div>
+<script>
+(()=>{'use strict';
+const C=document.getElementById('game'), ctx=C.getContext('2d',{alpha:false});
+const UI=id=>document.getElementById(id);
+const W=480,H=712,T=24,OX=120,OY=202,COLS=15,ROWS=21;
+const palette={sky:'#80bfcc',sea:'#1aa9ba',dirt:'#5d4135',gold:'#ffdf83',cyan:'#86f4ea'};
+const sites=[
+ {id:'farm',name:'Hydroponics',icon:'🌱',desc:'+$12 every 6 seconds. Grows your supplies.',rect:[3,9,5,3],cost:115,threshold:.64,color:'#8ced83',built:false},
+ {id:'workshop',name:'Drill Workshop',icon:'⚙️',desc:'Mine a wider area with every swipe.',rect:[9,10,5,3],cost:140,threshold:.64,color:'#ffc981',built:false},
+ {id:'medbay',name:'Medbay',icon:'❤️',desc:'Fortify the gate and repair 55 health.',rect:[4,15,5,3],cost:160,threshold:.64,color:'#ea91b0',built:false},
+ {id:'hangar',name:'Radar Station',icon:'📡',desc:'Faster helicopter recharge and +$40 bonus.',rect:[10,16,4,3],cost:170,threshold:.64,color:'#8ad6ff',built:false}
+];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const rand=(a,b)=>a+Math.random()*(b-a);
+const seeded=(n)=>{let x=Math.sin(n*93.313+21.71)*43758.545;return x-Math.floor(x)};
+let aCtx=null,soundOn=true;
+function sound(freq=440,dur=.08,type='square',gain=.033){if(!soundOn)return;try{aCtx??=new (window.AudioContext||window.webkitAudioContext)();if(aCtx.state==='suspended')aCtx.resume();const o=aCtx.createOscillator(),g=aCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,aCtx.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(45,freq*.66),aCtx.currentTime+dur);g.gain.setValueAtTime(gain,aCtx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,aCtx.currentTime+dur);o.connect(g);g.connect(aCtx.destination);o.start();o.stop(aCtx.currentTime+dur+.01)}catch(_){}}
+let state=null,world=null,rock=[],zombies=[],particles=[],tracers=[],floats=[],loots=[],survivors=[],stars=[];
+let pointer={down:false,x:0,y:0,lastX:0,lastY:0,lastDig:-1,lastShot:-2};let lastTick=0;
+let pausedByModal=true,active=false,gameOver=false,elapsed=0,toastUntil=0,toastText='',hudNext=0;
+const safeStorage=(key,value)=>{try{if(value===undefined)return Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(value))}catch(_){return 0}};
+function newGame(){
+ world={cash:160,health:100,maxHealth:100,wave:1,wavesMax:6,waveLeft:5,waveSpawned:0,waveSpawnAt:5,waveStarted:0,intermission:0,intermissionLeft:0,score:0,kills:0,rescued:0,turret:1,heliCharge:0,heliLive:0,heliX:-130,shots:0,mined:0,built:0,phase:'fight',nextIncome:6,success:false};
+ rock=Array.from({length:ROWS},(_,r)=>Array.from({length:COLS},(_,c)=>({solid:true,variant:seeded(r*43+c*117),crystal:false})));
+ zombies=[];particles=[];tracers=[];floats=[];loots=[];survivors=[];stars=[];elapsed=0;gameOver=false;active=true;pausedByModal=false;pointer.down=false;
+ sites.forEach(s=>s.built=false);
+ // The starting shelter, ladder shaft, and a tiny carved passage.
+ for(let r=4;r<=7;r++)for(let c=10;c<COLS;c++)setEmpty(c,r,false);
+ for(let r=0;r<=3;r++)for(let c=13;c<COLS;c++)setEmpty(c,r,false);
+ for(let c=12;c<COLS;c++)setEmpty(c,8,false);
+ for(let r=6;r<=8;r++)setEmpty(11,r,false);
+ // A visible fissure above the ocean and an escape opening.
+ for(let r=13;r<=16;r++)setEmpty(0,r,false);
+ for(let r=15;r<=16;r++)setEmpty(1,r,false);
+ loots=[{c:6,r:3,type:'cash',n:68},{c:3,r:7,type:'cash',n:58},{c:9,r:14,type:'cash',n:84},{c:2,r:18,type:'cash',n:70},{c:7,r:11,type:'ore',n:36},{c:12,r:19,type:'ore',n:50},{c:1,r:10,type:'ore',n:40}];
+ survivors=[{c:7,r:5,freed:false},{c:5,r:13,freed:false},{c:12,r:18,freed:false}];
+ for(let i=0;i<40;i++)stars.push({x:seeded(i*27)*W,y:seeded(i*93)*120,r:seeded(i+66)*1.5+.4});
+ updateHUD(true);UI('intro').classList.remove('open');UI('endOverlay').classList.remove('open');UI('pauseOverlay').classList.remove('open');UI('buildOverlay').classList.remove('open');flash('Wave 1 incoming! Mine for supplies.');
+ sound(580,.13,'triangle');
+}
+function setEmpty(c,r,effects=true){if(c<0||c>=COLS||r<0||r>=ROWS||!rock[r][c].solid)return false;rock[r][c].solid=false;if(effects)digReward(c,r);return true}
+function tileAt(x,y){const c=Math.floor((x-OX)/T),r=Math.floor((y-OY)/T);return {c,r,inside:c>=0&&c<COLS&&r>=0&&r<ROWS}}
+function isDirtAt(x,y){let {c,r,inside}=tileAt(x,y);return inside&&rock[r][c].solid}
+function edge(c,r){return r===0||c===0||[[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy])=>{let cc=c+dx,rr=r+dy;return cc>=0&&cc<COLS&&rr>=0&&rr<ROWS&&!rock[rr][cc].solid})}
+function excavate(c,r){if(gameOver||!active||pausedByModal)return;if(c<0||c>=COLS||r<0||r>=ROWS)return;if(!rock[r][c].solid)return;
+ if(!edge(c,r)){if(elapsed-pointer.lastDig>.3)flash('Start from the surface, water edge, or an open room');return}
+ const radius=sites.find(s=>s.id==='workshop').built?1:0;let digged=0;
+ for(let dr=-radius;dr<=radius;dr++)for(let dc=-radius;dc<=radius;dc++){let cc=c+dc,rr=r+dr;if(cc>=0&&cc<COLS&&rr>=0&&rr<ROWS&&rock[rr][cc].solid){if(setEmpty(cc,rr,true))digged++}}
+ if(digged){sound(rand(95,125),.047,'triangle',.023);pointer.lastDig=elapsed;world.cash+=digged*2;world.score+=digged*3;world.mined+=digged;updateHUD();}
+}
+function digReward(c,r){const x=OX+c*T+T/2,y=OY+r*T+T/2;
+ for(let i=0;i<7;i++)sparks(x,y,rand(-90,90),rand(-95,85),rand(.25,.6),seeded(c+r+i)>.5?'#ad7b56':'#ddb389',rand(2,4));
+ const loot=loots.find(a=>a.c===c&&a.r===r&&!a.found);
+ if(loot){loot.found=true;world.cash+=loot.n;world.score+=loot.n*3;floatText(x,y,`+$${loot.n}`,'#a6ff9f',1.3);flash(loot.type==='ore'?`Ore vein! +$${loot.n}`:`Supply cache! +$${loot.n}`);sound(880,.15,'sine',.08)}
+ const survivor=survivors.find(a=>a.c===c&&a.r===r&&!a.freed);
+ if(survivor){survivor.freed=true;world.rescued++;world.cash+=45;world.score+=300;floatText(x,y,'RESCUED! +$45','#c3ffef',1.55);flash(`Survivor rescued! (${world.rescued}/3)`);sound(560,.17,'sine',.07);setTimeout(()=>sound(920,.21,'sine',.07),100)}
+}
+function sparks(x,y,vx,vy,ttl,col,size){particles.push({x,y,vx,vy,life:ttl,max:ttl,col,size,grav:150})}
+function burst(x,y,col,n=10){for(let i=0;i<n;i++)sparks(x,y,rand(-110,110),rand(-180,30),rand(.35,.8),col,rand(2,5))}
+function floatText(x,y,text,col='#fff',life=.95){floats.push({x,y,text,col,life,max:life})}
+let enemyId=1;
+function spawnZombie(){const type=world.wave>=4&&Math.random()<.22?'brute':(world.wave>=2&&Math.random()<.27?'runner':'normal');let hp=2+world.wave*.9+(type==='brute'?5:0),speed=(type==='runner'?35:16)+(world.wave-1)*2.25;
+ zombies.push({id:enemyId++,x:132+rand(0,9),y:OY-4,vy:0,hp,maxhp:hp,type,speed,blink:0,phase:rand(0,9),bite:0,fall:0});
+}
+function hurtZombie(z,damage=2){if(z.hp<=0)return;z.hp-=damage;z.blink=.13;burst(z.x,z.y-21,'#fd837e',3);if(z.hp<=0){z.dead=true;world.kills++;world.cash+=(z.type==='brute'?30:12);world.score+=z.type==='brute'?110:55;world.heliCharge=Math.min(100,world.heliCharge+(sites[3].built?28:18));burst(z.x,z.y-13,'#fb6c76',14);floatText(z.x,z.y-25,z.type==='brute'?'+$30':'+$12','#b7ffb1');sound(130,.11,'sawtooth',.033);updateHUD()}}
+function fireAt(x,y,auto=false){if(!active||pausedByModal||gameOver)return false;
+ let target=null,d=auto?Infinity:38;
+ for(const z of zombies){let dd=Math.hypot(z.x-x,z.y-24-y);if(!z.dead&&dd<d){d=dd;target=z}}
+ if(!target)return false;
+ if(!auto&&elapsed-pointer.lastShot<.18)return false;
+ if(!auto)pointer.lastShot=elapsed;
+ const amount=auto?(.95+(world.turret-1)*.85):2.2;
+ hurtZombie(target,amount);
+ const fromX=auto?445:430,fromY=auto?OY-23:OY-17;
+ tracers.push({x1:fromX,y1:fromY,x2:target.x,y2:target.y-20,life:.16,max:.16,color:auto?'#fff1a6':'#8dfff6'});
+ world.shots++;if(!auto)sound(400+rand(0,80),.06,'square',.025);return true;
+}
+function attack(){if(world.heliLive>0)return;
+ if(world.wave<3){flash('Helicopter unlocks at wave 3');return}
+ if(world.heliCharge<100){flash(`Airstrike charging: ${Math.floor(world.heliCharge)}%`);return}
+ world.heliCharge=0;world.heliLive=6.0;world.heliX=-90;flash('AIR SUPPORT INBOUND!');sound(310,.35,'sawtooth',.06);updateHUD();
+}
+function hurtGate(amount){if(world.health<=0)return;world.health=Math.max(0,world.health-amount);sparks(441,OY-6,rand(-45,45),rand(-70,20),.4,'#fd997a',4);if(world.health<=0)finish(false);updateHUD()}
+function siteCleared(site){let count=0,[x,y,w,h]=site.rect;for(let r=y;r<y+h;r++)for(let c=x;c<x+w;c++)if(!rock[r][c].solid)count++;return count/(w*h)}
+function buildPurchase(id){if(!active||gameOver)return;
+ if(id==='turret'){let cost=world.turret===1?80:world.turret===2?160:270;if(world.turret>=4)return;if(world.cash<cost)return flash('Not enough supplies');world.cash-=cost;world.turret++;world.score+=100;flash(`Auto turret upgraded to level ${world.turret}`);sound(570,.17,'triangle',.06)}
+ else if(id==='repair'){if(world.health>=world.maxHealth)return flash('Gate is already at full health');if(world.cash<48)return flash('Not enough supplies');world.cash-=48;world.health=Math.min(world.maxHealth,world.health+50);flash('Gate repaired +50');sound(400,.14,'triangle',.05)}
+ else{let s=sites.find(a=>a.id===id);if(!s||s.built)return;if(world.cash<s.cost)return flash('Not enough supplies');if(siteCleared(s)<s.threshold)return flash(`Mine more ground for ${s.name}`);
+ world.cash-=s.cost;s.built=true;world.built++;world.score+=250;
+ const [x,y,w,h]=s.rect;for(let r=y;r<y+h;r++)for(let c=x;c<x+w;c++)setEmpty(c,r,false);
+ if(id==='medbay'){world.maxHealth+=50;world.health=Math.min(world.maxHealth,world.health+90)}
+ if(id==='hangar')world.cash+=40;
+ flash(`${s.name} online!`);burst(OX+(x+w/2)*T,OY+(y+h/2)*T,s.color,28);sound(700,.2,'sine',.06);
+ }
+ updateHUD(true);renderBuildCards();
+}
+function renderBuildCards(){if(!world)return;
+ let cards=[];
+ const cost=world.turret===1?80:world.turret===2?160:270;
+ cards.push(`<div class="buildcard"><div class="buildicon">🔫</div><div><div class="buildtitle">Auto Turret · Lv ${world.turret}</div><div class="builddesc">Faster zombie kills. Upgrade to level 4.</div></div><button class="buy ${world.turret>=4?'built':''}" data-buy="turret" ${world.turret>=4||world.cash<cost?'disabled':''}>${world.turret>=4?'MAXED':`$${cost}`}</button></div>`);
+ for(const s of sites){const p=siteCleared(s),done=p>=s.threshold,can=world.cash>=s.cost&&done&&!s.built;
+ cards.push(`<div class="buildcard"><div class="buildicon">${s.icon}</div><div><div class="buildtitle">${s.name}</div><div class="builddesc">${s.desc}${!s.built?` · Cleared ${Math.floor(p*100)}% / ${Math.round(s.threshold*100)}%`:''}</div><div class="bar"><i style="width:${Math.min(100,p*100)}%"></i></div></div><button class="buy ${s.built?'built':''}" data-buy="${s.id}" ${can?'':'disabled'}>${s.built?'BUILT':done?`$${s.cost}`:'DIG FIRST'}</button></div>`)
+ }
+ cards.push(`<div class="buildcard"><div class="buildicon">🛠️</div><div><div class="buildtitle">Repair Gate</div><div class="builddesc">Restore 50 shelter HP (up to maximum).</div></div><button class="buy" data-buy="repair" ${world.cash<48||world.health===world.maxHealth?'disabled':''}>$48</button></div>`);
+ UI('buildCards').innerHTML=cards.join('');
+}
+function flash(msg){toastText=msg;toastUntil=performance.now()/1000+2.8;UI('toast').textContent=msg;UI('toast').classList.add('visible')}
+function updateHUD(force=false){if(!world)return;UI('money').textContent='$'+Math.floor(world.cash);UI('wave').textContent=world.wave+' / '+world.wavesMax;UI('healthFill').style.width=(100*world.health/world.maxHealth)+'%';UI('healthText').textContent=Math.ceil(world.health)+' / '+world.maxHealth;
+ const air=UI('airBtn');air.disabled=world.wave<3||world.heliCharge<100||world.heliLive>0;air.classList.toggle('airready',!air.disabled);
+ UI('airHint').textContent=world.wave<3?'Unlock wave 3':world.heliLive>0?'STRIKE ACTIVE':(world.heliCharge<100?'Charge '+Math.floor(world.heliCharge)+'%':'READY TO FIRE');
+ UI('goal').textContent=`${world.rescued} / 3 SURVIVORS  ·  ${world.kills} ZOMBIES STOPPED  ·  ${world.wave} / 6 WAVES`;
+ if(force)renderBuildCards();
+}
+function finish(win){if(gameOver)return;gameOver=true;active=false;pausedByModal=true;world.success=win;
+ const best=safeStorage('dead_tide_best');if(world.score>best)safeStorage('dead_tide_best',Math.floor(world.score));
+ UI('endKicker').textContent=win?'MISSION COMPLETE':'THE DEAD GOT THROUGH';
+ UI('endTitle').innerHTML=win?'SHELTER<br><em>SECURED.</em>':'SHELTER<br><em>OVERRUN.</em>';
+ UI('endDesc').textContent=win?`You survived all six waves and rescued ${world.rescued} of 3 survivors. ${world.rescued===3?'Every survivor made it home.':'There are still people trapped in the cliffs. Try to rescue all three next time.'}`:'The gate fell under the pressure. Dig a trap under the approach, upgrade your turret, and build defenses earlier next run.';
+ UI('resultStats').innerHTML=`<div class="resultstat"><b>${world.kills}</b>ZOMBIES</div><div class="resultstat"><b>${world.rescued}/3</b>RESCUED</div><div class="resultstat"><b>${Math.floor(world.score)}</b>SCORE</div>`;
+ UI('endOverlay').classList.add('open');sound(win?820:200,.45,win?'sine':'sawtooth',.06)
+}
+function nextWave(){if(world.wave>=world.wavesMax){finish(true);return}
+ world.wave++;world.waveSpawned=0;world.waveLeft=4+world.wave*2;world.waveSpawnAt=elapsed+3;world.phase='fight';world.waveStarted=elapsed;
+ world.cash+=35;world.score+=100;world.health=Math.min(world.maxHealth,world.health+12);
+ flash(`WAVE ${world.wave}! +$35 supplies`);burst(420,OY-37,'#fdd080',25);
+ if(world.wave===3) {world.heliCharge=100;setTimeout(()=>{if(world&&!gameOver)flash('Helicopter unlocked! AIRSTRIKE ready.');updateHUD()},1200)}
+ updateHUD(true)
+}
+function step(dt){if(!active||pausedByModal||gameOver)return;elapsed+=dt;
+ if(world.phase==='fight'){
+  if(world.waveSpawned<world.waveLeft && elapsed>=world.waveSpawnAt){spawnZombie();world.waveSpawned++;world.waveSpawnAt=elapsed+Math.max(.55,2.4-world.wave*.16)*rand(.78,1.12)}
+  if(world.waveSpawned===world.waveLeft&&zombies.length===0){
+   if(world.wave===world.wavesMax){
+    if(world.rescued===3){finish(true);return}
+    world.phase='rescue';flash(`All waves defeated! Rescue ${3-world.rescued} remaining survivor${3-world.rescued===1?'':'s'}.`);
+   }else {world.phase='intermission';world.intermissionLeft=7.5;flash('Wave cleared! Prepare your bunker.');world.cash+=45}
+   updateHUD(true)
+  }
+ }else if(world.phase==='intermission'){world.intermissionLeft-=dt;if(world.intermissionLeft<=0)nextWave()}
+ else if(world.phase==='rescue'&&world.rescued>=3){finish(true);return}
+ if(sites[0].built&&elapsed>=world.nextIncome){world.cash+=12;floatText(OX+150,OY+230,'+$12 farm','#b8ffd5');world.nextIncome=elapsed+6;updateHUD()}
+ if(!sites[0].built)world.nextIncome=elapsed+6;
+ world.autoTimer=(world.autoTimer||0)-dt;
+ if(world.autoTimer<=0){let close=null,dist=330;
+  for(const z of zombies){if(z.dead)continue;const d=Math.hypot(445-z.x,(OY-19)-(z.y-24));if(d<dist){close=z;dist=d}}
+  if(close){fireAt(close.x,close.y-24,true);world.autoTimer=Math.max(.18,.85-(world.turret-1)*.17)}else world.autoTimer=.09;
+ }
+ for(const z of zombies){if(z.dead)continue;z.phase+=dt*9;z.blink=Math.max(0,z.blink-dt);
+  // Zombies march across the roof and actually attack the security gate.
+  // If you dig a pit beneath them first, they drop into the mine instead.
+  if(z.x>=428&&z.y<=OY+15){
+   z.x=430;z.y=OY-2;z.vy=0;z.bite-=dt;
+   if(z.bite<=0){z.bite=z.type==='runner'?.74:1.1;hurtGate(z.type==='brute'?17:8);burst(445,OY-17,'#ff8f77',6)}
+  } else {
+   const below=isDirtAt(z.x,z.y+3);
+   if(!below){z.vy+=560*dt;z.y+=z.vy*dt;z.fall+=dt;}
+   else {z.vy=0;const ground=OY+Math.floor((z.y+3-OY)/T)*T;z.y=Math.min(z.y,ground-2);z.fall=0}
+   const move=z.speed*(below?1:.65)*dt;
+   // A zombie that falls into a mine cannot walk straight through solid rock.
+   if(z.y>OY+15&&(isDirtAt(z.x+move+7,z.y-15)||isDirtAt(z.x+move+7,z.y-27))){
+    z.stuck=(z.stuck||0)+dt;
+    if(z.stuck>2.65){const tile=tileAt(z.x+move+7,z.y-15);if(tile.inside)setEmpty(tile.c,tile.r,false);z.stuck=0;burst(z.x+11,z.y-15,'#cfa67c',5)}
+   } else {z.x+=move;z.stuck=0}
+   if(z.x>=428&&z.y<=OY+15){z.x=430;z.y=OY-2}
+   if(z.x>=444&&z.y>OY+25&&z.y<OY+215){z.x=444;z.bite-=dt;
+    if(z.bite<=0){z.bite=1.3;hurtGate(13)}}
+  }
+  if((z.x<OX+2&&z.y>OY+28)||z.y>H+80||z.x>W+30){z.dead=true;world.kills++;world.cash+=8;world.score+=30;burst(z.x,Math.min(z.y,H-30),'#90f1f4',8);floatText(clamp(z.x,35,440),clamp(z.y,40,H-40),'SWEPT AWAY +$8','#a8fff8');world.heliCharge=Math.min(100,world.heliCharge+10);updateHUD()}
+ }
+ zombies=zombies.filter(z=>!z.dead);
+ if(world.heliLive>0){world.heliLive=Math.max(0,world.heliLive-dt);world.heliX+=105*dt;world.heliShot=(world.heliShot||0)-dt;
+  if(world.heliShot<=0){const targets=zombies.filter(z=>z.x<world.heliX+100 && z.x>world.heliX-170);if(targets.length){const target=targets[Math.floor(Math.random()*targets.length)];tracers.push({x1:world.heliX,y1:75,x2:target.x,y2:target.y-20,life:.28,max:.28,color:'#ffe395'});hurtZombie(target,8);burst(target.x,target.y-20,'#ffcf70',8)}world.heliShot=.16}
+  if(world.heliLive===0){flash('Air support departing.');updateHUD()}
+ }
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=p.grav*dt;p.life-=dt}
+ particles=particles.filter(p=>p.life>0);
+ for(const p of tracers)p.life-=dt;tracers=tracers.filter(p=>p.life>0);
+ for(const p of floats){p.y-=25*dt;p.life-=dt}floats=floats.filter(p=>p.life>0);
+ if(pointer.down&&pointer.y<OY&&elapsed-pointer.lastShot>.19)fireAt(pointer.x,pointer.y,false);
+ if(elapsed>hudNext){hudNext=elapsed+.35;updateHUD()}
+}
+function rounded(x,y,w,h,r=8){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function poly(coords,color){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(coords[0][0],coords[0][1]);for(let i=1;i<coords.length;i++)ctx.lineTo(...coords[i]);ctx.closePath();ctx.fill()}
+function line(x1,y1,x2,y2,col,lw=2){ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+function font(s,weight='900'){ctx.font=`${weight} ${s}px system-ui, -apple-system, sans-serif`}
+function text(str,x,y,size=12,col='#fff',align='left'){ctx.textAlign=align;ctx.textBaseline='middle';font(size);ctx.fillStyle=col;ctx.fillText(str,x,y)}
+function paintSky(t){const sky=ctx.createLinearGradient(0,0,0,OY+40);sky.addColorStop(0,'#203c5c');sky.addColorStop(.57,'#7e9eb2');sky.addColorStop(1,'#b1c5bd');ctx.fillStyle=sky;ctx.fillRect(0,0,W,OY+65);
+ ctx.fillStyle='#f9d796';ctx.globalAlpha=.25;ctx.beginPath();ctx.arc(372,61,57,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ // muted distant ridge
+ poly([[0,182],[58,134],[114,160],[175,108],[233,151],[296,118],[372,157],[480,135],[480,255],[0,255]],'#57778a');
+ poly([[0,200],[73,177],[133,201],[227,156],[291,197],[358,173],[480,199],[480,263],[0,263]],'#385e79');
+ ctx.save();ctx.globalAlpha=.20;for(let i=0;i<7;i++){const x=((i*97+t*2.5)%620)-100,y=34+(i%4)*32;ctx.fillStyle='#effafa';ctx.beginPath();ctx.ellipse(x,y,55,9,0,0,Math.PI*2);ctx.ellipse(x+32,y+2,47,8,0,0,Math.PI*2);ctx.fill()}ctx.restore();
+ for(const s of stars){ctx.globalAlpha=.08+Math.sin(t*2+s.x)*.04;ctx.fillStyle='#fffcdf';ctx.fillRect(s.x,s.y,s.r,s.r)}ctx.globalAlpha=1;
+}
+function paintSea(t){let sea=ctx.createLinearGradient(0,205,0,H);sea.addColorStop(0,'#6cdee4');sea.addColorStop(.35,'#14b0c4');sea.addColorStop(1,'#024e75');ctx.fillStyle=sea;ctx.fillRect(0,205,W,H);
+ ctx.save();ctx.globalAlpha=.2;poly([[0,420],[49,388],[102,465],[154,433],[201,534],[238,450],[303,560],[390,470],[480,545],[480,H],[0,H]],'#125977');ctx.globalAlpha=.15;poly([[0,582],[58,539],[105,609],[189,550],[300,665],[390,587],[480,647],[480,H],[0,H]],'#073754');ctx.restore();
+ for(let i=0;i<52;i++){let x=(seeded(i*7.8)*W+Math.sin(t*.9+i)*16),y=245+seeded(i*93)*450;ctx.globalAlpha=.07+seeded(i+15)*.14;line(x,y,x+10+seeded(i+8)*30,y-3,'#bdffff',1.1)}ctx.globalAlpha=1;
+ // wave foam and current
+ for(let i=0;i<15;i++){let x=((i*41+t*25)%620)-50,y=230+Math.sin(i+t*1.5)*3;line(x,y,x+22,y+1,'#e5ffff99',1.5)}
+}
+function paintSoil(t){ // jagged shoreline
+ poly([[OX-8,OY+1],[135,OY-6],[170,OY+6],[205,OY-5],[248,OY+2],[287,OY-7],[351,OY+3],[410,OY-5],[W,OY-2],[W,H],[OX,H],[OX-3,619],[90,589],[OX-2,525],[OX+1,365],[101,292]],'#5d453b');
+ poly([[OX-8,OY+9],[145,OY-2],[184,OY+7],[242,OY+4],[307,OY-5],[375,OY+4],[W,OY+2],[W,OY+17],[153,OY+18],[OX,OY+22]],'#9a8068');
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+  const x=OX+c*T,y=OY+r*T,cell=rock[r][c];if(!cell.solid)continue;
+  const noise=cell.variant;ctx.fillStyle=noise<.24?'#594035':noise<.52?'#644639':noise<.76?'#674a3e':'#6c4a3c';ctx.fillRect(x,y,T+.4,T+.4);
+  if(noise>.84){poly([[x+2,y+T*.8],[x+9,y+T*.4],[x+16,y+T*.7],[x+T,y+T*.28],[x+17,y+T]],'#8b6953');}
+  if(noise<.24){line(x+3,y+3,x+T-7,y+11,'#4a3831',1);line(x+T-7,y+11,x+T-10,y+T-2,'#4a3831',1)}
+  if(seeded(r*27+c*17)>.7){ctx.fillStyle='#be9567';ctx.globalAlpha=.2;ctx.fillRect(x+7,y+4,3,3);ctx.globalAlpha=1}
+ }
+ // Exposed mine walls in dug areas.
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(rock[r][c].solid)continue;const x=OX+c*T,y=OY+r*T;
+  const gradient=ctx.createLinearGradient(x,y,x+T,y+T);gradient.addColorStop(0,'#332a2b');gradient.addColorStop(1,'#1a2630');ctx.fillStyle=gradient;ctx.fillRect(x,y,T+.6,T+.6);
+  if(r>0&&rock[r-1][c].solid){ctx.fillStyle='#9d765e';ctx.fillRect(x,y,T,3)}
+  if(c>0&&rock[r][c-1].solid){ctx.fillStyle='#987057';ctx.fillRect(x,y,3,T)}
+  if(c<COLS-1&&rock[r][c+1].solid){ctx.fillStyle='#140f13';ctx.fillRect(x+T-3,y,3,T)}
+  if(r<ROWS-1&&rock[r+1][c].solid){ctx.fillStyle='#211b21';ctx.fillRect(x,y+T-3,T,3)}
+ }
+ // The seaside cut and foam on the cliff face.
+ poly([[0,OY],[OX-8,OY],[108,OY+65],[115,OY+177],[107,OY+292],[102,OY+381],[113,OY+420],[OX,H],[0,H]],'#1d9ab5');
+ ctx.save();ctx.globalAlpha=.35;for(let i=0;i<22;i++){let yy=OY+i*25;line(110+Math.sin(i*3.1)*7,yy,122+Math.sin(i*3.1)*7,yy+7,'#9cf4ff',2)}ctx.restore();
+}
+function roomFrame(x,y,w,h,lit='#f4ba6c'){ctx.fillStyle='#394452';ctx.fillRect(x-6,y-6,w+12,h+12);ctx.fillStyle='#81919b';ctx.fillRect(x-3,y-3,w+6,h+6);ctx.fillStyle='#171f2c';ctx.fillRect(x+2,y+2,w-4,h-4);
+ let gl=ctx.createLinearGradient(0,y,0,y+h);gl.addColorStop(0,'#62584b');gl.addColorStop(1,'#292c35');ctx.fillStyle=gl;ctx.fillRect(x+4,y+4,w-8,h-8);
+ ctx.fillStyle='#ffe1a65b';ctx.fillRect(x+12,y+4,w-24,3);ctx.fillStyle=lit;ctx.fillRect(x+12,y+6,20,3);ctx.fillRect(x+w-32,y+6,20,3);
+ ctx.fillStyle='#18232e';ctx.fillRect(x+2,y+h-16,w-4,13);ctx.fillStyle='#9a8a6b';ctx.fillRect(x+2,y+h-17,w-4,3)
+}
+function drawPerson(x,y,shirt='#89dfe8',scale=1,t=0){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
+ ctx.strokeStyle='#293546';ctx.lineWidth=3.6;ctx.lineCap='round';line(-3,1,-5+Math.sin(t)*2,12,'#35404e',3);line(3,1,5-Math.sin(t)*2,12,'#35404e',3);
+ ctx.fillStyle=shirt;ctx.beginPath();ctx.moveTo(-6,-17);ctx.lineTo(6,-17);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.fill();
+ line(-6,-13,-9,-1,'#d1a48f',3);line(6,-13,9,-2,'#d1a48f',3);
+ ctx.fillStyle='#e0b7a0';ctx.beginPath();ctx.arc(0,-22,5.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#302a32';ctx.fillRect(-5,-28,10,4);
+ ctx.restore()}
+function paintBase(t){
+ // Main safe room and access shaft already mined.
+ const x=OX+10*T,y=OY+4*T,w=5*T,h=4*T;
+ roomFrame(x,y,w,h,'#d9ffca');
+ ctx.fillStyle='#324c53';ctx.fillRect(x+10,y+h-50,37,32);ctx.fillStyle='#9dedb0';ctx.fillRect(x+17,y+h-44,23,18);
+ ctx.fillStyle='#83ead7';ctx.fillRect(x+17,y+h-42,23,2);
+ ctx.fillStyle='#b7b89b';ctx.fillRect(x+w-38,y+h-44,22,25);ctx.fillStyle='#598ea2';ctx.fillRect(x+w-36,y+h-42,18,18);
+ // Green glowing core.
+ ctx.save();ctx.shadowBlur=22;ctx.shadowColor='#69ffe4';ctx.fillStyle='#6cefd9';ctx.beginPath();ctx.arc(x+w-27,y+45,16+Math.sin(t*3)*2,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.strokeStyle='#4ddad3';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x+w-27,y+45,12,0,Math.PI*2);ctx.stroke();
+ drawPerson(x+64,y+h-28,'#ffdc85',.85,t*3);drawPerson(x+29,y+h-28,'#9cd9fc',.8,t*2.3);
+ for(let r=0;r<4;r++){line(456,OY+r*T+6,456,OY+(r+1)*T+4,'#adbac0',2);for(let k=0;k<2;k++)line(449,OY+r*T+9+k*10,463,OY+r*T+9+k*10,'#c6d4cf',1.8)}
+ // Thick security gate.
+ const gateColor=world.health/world.maxHealth<.36?'#ef7a63':'#8be5c1';
+ ctx.save();ctx.shadowColor=gateColor;ctx.shadowBlur=9;ctx.fillStyle='#1c3545';ctx.fillRect(430,OY-33,28,39);ctx.fillStyle=gateColor;ctx.fillRect(433,OY-28,21,5);ctx.fillRect(436,OY-18,15,3);ctx.restore();
+ ctx.fillStyle='#d4d6be';ctx.fillRect(439,OY-4,10,7);
+ // Mounted turret
+ ctx.save();ctx.translate(440,OY-41);ctx.fillStyle='#243443';ctx.fillRect(-12,0,22,9);ctx.fillStyle='#bbc8bd';ctx.fillRect(-9,-7,21,10);
+ ctx.fillStyle='#eabf64';ctx.beginPath();ctx.arc(1,-7,10,Math.PI,0);ctx.fill();ctx.fillRect(-31,-11,24,5);ctx.fillStyle='#262c3d';ctx.fillRect(-34,-10,10,3);ctx.fillStyle='#a6e7ef';ctx.fillRect(-8,-10,4,5);ctx.restore();
+ text('SAFE ROOM',x+57,y+14,10,'#e4ffe4','center');
+ for(const s of sites){let [c,r,sw,sh]=s.rect,px=OX+c*T,py=OY+r*T,pw=sw*T,ph=sh*T;
+  if(s.built){roomFrame(px,py,pw,ph,s.color);
+   if(s.id==='farm'){for(let i=0;i<5;i++){const dx=px+15+i*20;ctx.fillStyle='#545d42';ctx.fillRect(dx,py+ph-34,15,16);ctx.strokeStyle=s.color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(dx+7,py+ph-36);ctx.lineTo(dx+5+Math.sin(t*3+i)*3,py+ph-60);ctx.moveTo(dx+7,py+ph-48);ctx.lineTo(dx+1,py+ph-53);ctx.stroke();}drawPerson(px+pw-25,py+ph-29,'#a9df77',.74,t*2)}
+   if(s.id==='workshop'){ctx.fillStyle='#677d83';ctx.fillRect(px+9,py+ph-52,pw-18,29);for(let i=0;i<3;i++){ctx.fillStyle=i%2?'#efbc73':'#8bbfcc';ctx.fillRect(px+21+i*26,py+ph-60,14,23)}ctx.save();ctx.translate(px+pw-38,py+45);ctx.rotate(t*.7);ctx.strokeStyle='#e6bc79';ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);ctx.stroke();ctx.restore();}
+   if(s.id==='medbay'){ctx.fillStyle='#c3d1cb';rounded(px+12,py+ph-50,pw-25,22,5);ctx.fill();ctx.fillStyle='#ee7894';ctx.fillRect(px+26,py+17,19,6);ctx.fillRect(px+33,py+10,6,20);drawPerson(px+pw-26,py+ph-27,'#ffd4d9',.85,t*2.1)}
+   if(s.id==='hangar'){ctx.fillStyle='#b3cad4';ctx.fillRect(px+pw/2-4,py+24,8,ph-42);line(px+pw/2-21,py+25,px+pw/2+21,py+25,'#b3ecf1',4);for(let i=0;i<3;i++){ctx.strokeStyle='#77e5fa';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px+pw/2,py+32,9+i*12,-2.4,-.7);ctx.stroke()}}}
+  else{
+   ctx.save();ctx.strokeStyle='#a2d5d5';ctx.globalAlpha=.45;ctx.lineWidth=1.5;ctx.setLineDash([5,6]);ctx.strokeRect(px+3,py+3,pw-6,ph-6);ctx.setLineDash([]);
+   ctx.fillStyle='#122735a8';rounded(px+6,py+10,pw-12,28,5);ctx.fill();ctx.globalAlpha=.8;ctx.fillStyle=s.color;font(10);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s.icon+' '+Math.floor(siteCleared(s)*100)+'% CLEARED',px+pw/2,py+24);ctx.restore();
+  }
+ }
+}
+function paintPickups(t){
+ for(const l of loots){if(l.found)continue;const x=OX+l.c*T+T/2,y=OY+l.r*T+T/2;ctx.save();ctx.shadowBlur=12;ctx.shadowColor=l.type==='cash'?'#7effb2':'#ffd17c';ctx.translate(x,y+Math.sin(t*2+l.c)*2);ctx.rotate(-.2);
+ if(l.type==='cash'){ctx.fillStyle='#4ada85';rounded(-11,-7,22,14,3);ctx.fill();ctx.fillStyle='#c3ffc4';ctx.fillRect(-6,-3,12,6);text('$',0,0,8,'#138247','center')}
+ else{poly([[-9,5],[-4,-8],[5,-10],[11,-2],[5,9],[-4,10]],'#ffca5d');poly([[-4,-8],[4,-9],[2,3],[-6,8]],'#ffeaa4')}
+ ctx.restore();}
+ for(const s of survivors){if(s.freed)continue;const x=OX+s.c*T+T/2,y=OY+s.r*T+T/2;
+ ctx.save();ctx.globalAlpha=.55+Math.sin(t*3+s.c)*.22;ctx.shadowColor='#a5fcff';ctx.shadowBlur=18;ctx.strokeStyle='#bff8ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,14+Math.sin(t*2)*2,0,Math.PI*2);ctx.stroke();ctx.restore();
+ drawPerson(x,y+6,'#a7eff4',.58,t)}
+}
+function paintZombie(z,t){ctx.save();ctx.translate(z.x,z.y);const sway=Math.sin(z.phase)*3.4;ctx.translate(sway,0);
+ if(z.blink){ctx.shadowColor='#fff';ctx.shadowBlur=18}
+ const brute=z.type==='brute',scale=brute?1.3:z.type==='runner'?.85:1;ctx.scale(scale,scale);
+ // ragged silhouette and crooked walk
+ line(-4,-12,-8+Math.sin(z.phase)*5,-1,'#d76772',4.5);line(5,-12,10-Math.sin(z.phase)*5,-2,'#cf6071',4.5);
+ poly([[-10,-38],[8,-36],[11,-13],[1,-8],[-11,-11]],z.blink?'#fff3ed':brute?'#b34c63':'#da6d78');
+ line(-9,-32,-17,-19+Math.sin(z.phase)*3,'#d86c79',5);line(8,-31,17,-23-Math.sin(z.phase)*3,'#d86c79',5);
+ ctx.fillStyle='#d97580';ctx.beginPath();ctx.ellipse(0,-44,8,10,-.13,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#30202a';ctx.fillRect(-6,-50,14,4);ctx.fillStyle='#d3ffc3';ctx.fillRect(-5,-45,3,2);ctx.fillRect(3,-45,3,2);
+ if(brute){ctx.fillStyle='#8c3952';ctx.fillRect(-11,-35,22,13)}
+ // enemy health
+ ctx.fillStyle='#180d16';ctx.fillRect(-13,-60,26,4);ctx.fillStyle='#ff6e75';ctx.fillRect(-13,-60,Math.max(0,26*z.hp/z.maxhp),4);
+ ctx.restore()}
+function paintHeli(t){if(world.heliLive<=0)return;const x=world.heliX,y=64+Math.sin(t*4)*4;ctx.save();ctx.translate(x,y);ctx.shadowColor='#0c1c27';ctx.shadowBlur=5;
+ ctx.fillStyle='#2b3d42';rounded(-28,-11,66,24,10);ctx.fill();ctx.fillStyle='#839590';rounded(-23,-8,37,17,8);ctx.fill();ctx.fillStyle='#91dce0';ctx.beginPath();ctx.moveTo(8,-8);ctx.lineTo(28,-7);ctx.lineTo(34,4);ctx.lineTo(8,4);ctx.fill();
+ poly([[-26,0],[-72,-10],[-67,4],[-26,8]],'#304044');line(-68,-20,-68,4,'#6a8c8a',3);line(-30,15,20,15,'#39464b',3);line(-22,12,-22,18,'#778b85',2);line(13,11,13,18,'#778b85',2);
+ line(-11,-13,-11,-23,'#778b85',3);const spin=Math.sin(t*77)*20;line(-42-spin,-23,25+spin,-23,'#e5eeeaaa',3);
+ ctx.restore()}
+function paintAttack(t){for(const z of zombies)paintZombie(z,t);paintHeli(t);
+ for(const b of tracers){ctx.globalAlpha=b.life/b.max;line(b.x1,b.y1,b.x2,b.y2,b.color,2.4);ctx.fillStyle='#ffefb5';ctx.beginPath();ctx.arc(b.x2,b.y2,4,0,2*Math.PI);ctx.fill()}ctx.globalAlpha=1;
+ for(const p of particles){ctx.globalAlpha=p.life/p.max;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,p.size,p.size)}ctx.globalAlpha=1;
+ for(const p of floats){ctx.globalAlpha=p.life/p.max;text(p.text,p.x,p.y,12,p.col,'center')}ctx.globalAlpha=1;
+}
+function overlayScene(t){const vign=ctx.createRadialGradient(W/2,H/2,130,W/2,H/2,520);vign.addColorStop(0,'#0000');vign.addColorStop(1,'#00122363');ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+ // Defend prompts and useful overlays.
+ if(world.phase==='intermission'&&!gameOver){ctx.fillStyle='#081e2ed6';rounded(103,65,274,59,12);ctx.fill();ctx.strokeStyle='#f4c46a';ctx.lineWidth=1;ctx.stroke();text('WAVE CLEARED',240,86,17,'#ffe5a2','center');text('Next wave in '+Math.ceil(world.intermissionLeft)+'s  ·  Dig or build now',240,110,11,'#cee7ec','center')}
+ if(world.phase==='fight'&&world.waveSpawned<world.waveLeft&&elapsed<10){ctx.fillStyle='#122735af';rounded(7,8,240,37,8);ctx.fill();text('⛏ DRAG THROUGH THE DIRT',16,20,11,'#e3f8fa');text('TAP ZOMBIES TO HELP THE TURRET',16,36,9,'#e1d1a9')}
+ const waveDanger=world.health/world.maxHealth<.28;if(waveDanger){ctx.strokeStyle=`rgba(255,70,77,${.28+Math.sin(t*7)*.18})`;ctx.lineWidth=12;ctx.strokeRect(0,0,W,H)}
+ if(world.wave>=3&&world.heliCharge===100&&world.heliLive===0&&elapsed%5<1.2){text('🚁 AIRSTRIKE READY',240,61,16,'#d9fff8','center')}
+ if(world.phase==='rescue'){ctx.fillStyle='#081e2eea';rounded(62,65,356,61,12);ctx.fill();ctx.strokeStyle='#b5f1dc';ctx.lineWidth=1;ctx.stroke();text('ZOMBIE WAVES DEFEATED',240,87,15,'#c7ffdb','center');text(`Dig to rescue ${3-world.rescued} remaining survivor${3-world.rescued===2?'s':''}`,240,111,12,'#f3d6a3','center')}
+ if(world.phase==='fight'){const n=Math.max(0,world.waveLeft-world.waveSpawned)+zombies.length;ctx.fillStyle='#051e2db9';rounded(W-113,9,101,26,9);ctx.fill();text(`${n} THREATS`,W-62,22,11,'#ffdab2','center')}
+}
+function render(t){if(!world)return;ctx.save();ctx.clearRect(0,0,W,H);paintSky(t);paintSea(t);paintSoil(t);paintBase(t);paintPickups(t);paintAttack(t);overlayScene(t);ctx.restore()}
+function resize(){const box=UI('stage').getBoundingClientRect();let w=box.width,h=box.height,dpr=Math.min(window.devicePixelRatio||1,2);C.width=Math.round(w*dpr);C.height=Math.round(h*dpr);C.style.width=w+'px';C.style.height=h+'px';
+ const sc=Math.min(w/W,h/H),dx=(w-W*sc)/2,dy=(h-H*sc)/2;ctx.setTransform(dpr*sc,0,0,dpr*sc,dpr*dx,dpr*dy);C._mapping={sc,dx,dy,w,h,dpr};render(elapsed)}
+function drawFrame(now){let dt=Math.min((now-lastTick)/1000||0,.035);lastTick=now;if(!pausedByModal&&active)step(dt);render(elapsed+now*.00018);if(toastText&&now/1000>toastUntil){toastText='';UI('toast').classList.remove('visible')}requestAnimationFrame(drawFrame)}
+function point(e){let m=C._mapping||{sc:1,dx:0,dy:0};const r=C.getBoundingClientRect();return {x:clamp((e.clientX-r.left-m.dx)/m.sc,0,W),y:clamp((e.clientY-r.top-m.dy)/m.sc,0,H)}}
+function digPath(from,to){const dist=Math.hypot(to.x-from.x,to.y-from.y),n=Math.max(1,Math.ceil(dist/10));for(let i=0;i<=n;i++){let x=from.x+(to.x-from.x)*i/n,y=from.y+(to.y-from.y)*i/n;const {c,r,inside}=tileAt(x,y);if(inside)excavate(c,r)}}
+function pointerBegin(e){if(!active||pausedByModal||gameOver)return;e.preventDefault();C.setPointerCapture?.(e.pointerId);const p=point(e);pointer.down=true;pointer.x=p.x;pointer.y=p.y;pointer.lastX=p.x;pointer.lastY=p.y;
+ if(!fireAt(p.x,p.y,false))digPath(p,p);
+}
+function pointerMove(e){if(!pointer.down||!active||pausedByModal)return;e.preventDefault();const p=point(e);digPath({x:pointer.lastX,y:pointer.lastY},p);pointer.lastX=p.x;pointer.lastY=p.y;pointer.x=p.x;pointer.y=p.y;if(p.y<OY)fireAt(p.x,p.y,false)}
+function pointerEnd(e){pointer.down=false}
+function openBuild(){if(!active||gameOver)return;pausedByModal=true;renderBuildCards();UI('buildOverlay').classList.add('open');sound(420,.08,'triangle')}
+function closeBuild(){UI('buildOverlay').classList.remove('open');pausedByModal=false;lastTick=performance.now()}
+function openPause(){if(!active||gameOver)return;pausedByModal=true;UI('pauseOverlay').classList.add('open')}
+function closePause(){UI('pauseOverlay').classList.remove('open');pausedByModal=false;lastTick=performance.now()}
+UI('startBtn').addEventListener('click',newGame);UI('restartBtn').addEventListener('click',newGame);UI('restartPause').addEventListener('click',newGame);
+UI('buildBtn').addEventListener('click',openBuild);UI('closeBuild').addEventListener('click',closeBuild);UI('buildOverlay').addEventListener('click',e=>{if(e.target===UI('buildOverlay'))closeBuild()});
+UI('buildCards').addEventListener('click',e=>{const b=e.target.closest('button[data-buy]');if(b)buildPurchase(b.dataset.buy)});
+UI('pauseBtn').addEventListener('click',openPause);UI('resumeBtn').addEventListener('click',closePause);UI('airBtn').addEventListener('click',attack);
+UI('sound').addEventListener('click',()=>{soundOn=!soundOn;UI('sound').textContent=soundOn?'🔊':'🔇';if(soundOn)sound(500,.05,'sine')});
+UI('mineBtn').addEventListener('click',()=>flash('Drag on brown earth to dig. Tap or hold zombies to shoot.'));
+C.addEventListener('pointerdown',pointerBegin,{passive:false});C.addEventListener('pointermove',pointerMove,{passive:false});C.addEventListener('pointerup',pointerEnd);C.addEventListener('pointercancel',pointerEnd);C.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(UI('buildOverlay').classList.contains('open'))closeBuild();else if(UI('pauseOverlay').classList.contains('open'))closePause();else openPause()}if(e.key.toLowerCase()==='b'&&!pausedByModal)openBuild();if(e.key===' '&&!pausedByModal){attack();e.preventDefault()}});
+window.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{if(document.hidden&&active&&!pausedByModal)openPause()});
+// Draw the stage behind the title screen without progressing the game.
+newGame();active=false;pausedByModal=true;UI('intro').classList.add('open');UI('toast').classList.remove('visible');toastText='';resize();requestAnimationFrame(drawFrame);
+window.__deadTideDebug={getState:()=>world,getRock:()=>rock,getZombies:()=>zombies,getSites:()=>sites,excavate,spawnZombie,nextWave,finish,buildPurchase,attack,advance:(n)=>{for(let i=0;i<Math.ceil(n/.025);i++)step(.025)},render:()=>render(elapsed)};
+})();
+</script>
+</body></html>
